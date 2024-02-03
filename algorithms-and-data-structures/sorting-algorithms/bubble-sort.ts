@@ -1,8 +1,3 @@
-const arr: Array<number> = [-2, 4, 12, -1, 6, 9, 1, -3, 0, 7, 2, 5, 8, 3, 10, 11];
-let sortedArr: Array<number> | undefined = undefined;
-
-console.log(arr);
-
 function bubbleSort(arr: Array<number>): Array<number> {
     const n: number = arr.length;
 
@@ -17,4 +12,5 @@ function bubbleSort(arr: Array<number>): Array<number> {
     }
     return arr;
 }
-console.log(bubbleSort(arr));
+
+export default bubbleSort;
