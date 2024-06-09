@@ -4,8 +4,8 @@ class Uri {
   private readonly uri: string;
 
   constructor(protocol: string, cridentials: string, hostnamePort: string, options?: string) {
-    if(protocol && cridentials && hostnamePort) {
-      if(options) {
+    if (protocol && cridentials && hostnamePort) {
+      if (options) {
         this.uri = `${protocol}://${cridentials}@${hostnamePort}/${options}`;
       } else {
         this.uri = `${protocol}://${cridentials}@${hostnamePort}`;
@@ -28,36 +28,33 @@ class Client<T extends Document = Document> {
   private readonly dbOptions?: DbOptions
   private readonly collectionOptions?: CollectionOptions
 
-  constructor(uri: Uri, databaseName: string, collectionName: string, mongoClientOptions?: clientOptions, dbOptions?: DbOptions, collectionOptions?: CollectionOptions) {
+  constructor(
+    uri: Uri,
+    databaseName: string,
+    collectionName: string,
+    mongoClientOptions?: clientOptions,
+    dbOptions?: DbOptions,
+    collectionOptions?: CollectionOptions
+  ) {
     const uriString = uri.get();
-
-    if(uriString) {
-      this.uri = uriString;
-    } else {
+    if (!uriString) {
       throw new Error("Client | Uri string is incorrect.");
     }
+    this.uri = uriString;
 
-    if(databaseName) {
-      this.databaseName = databaseName;
-    } else {
+    if (!databaseName) {
       throw new Error("Client | Database name is incorrect.");
     }
+    this.databaseName = databaseName;
 
-    if(collectionName) {
-      this.collectionName = collectionName;
-    } else {
+    if (!collectionName) {
       throw new Error("Client | Collection name is incorrect.");
-    }
-
+    } 
+    this.collectionName = collectionName;
+    
+    this.client = new MongoClient(this.uri, mongoClientOptions);
     this.dbOptions = dbOptions;
     this.collectionOptions = collectionOptions;
-
-    const client = new MongoClient(this.uri, mongoClientOptions);
-    if(client) {
-      this.client = client;
-    } else {
-      throw new Error("Client | Client is incorrect.");
-    }
   }
 
   public getCollection(): Collection<T> {
@@ -84,7 +81,7 @@ const client = new Client<User>(
   new Uri("mongodb", "root:password", "localhost:27017"),
   "db",
   "test"
-  );
+);
 
 
 client.testConnection();
