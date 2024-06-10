@@ -60,7 +60,7 @@ export class Client<T extends Document = Document> {
     this.collectionOptions = collectionOptions;
   }
 
-  public getCollection(): Collection<T> {
+  private getCollection(): Collection<T> {
     return this.client.db(this.databaseName, this.dbOptions).collection(this.collectionName, this.collectionOptions);
   }
 
