@@ -1,6 +1,6 @@
-import { MongoClient, ClientSession, clientOptions, CollectionOptions, Collection, Document, ObjectId, DbOptions } from "npm:mongodb";
+import { MongoClient, ClientSession, clientOptions, CollectionOptions, Collection, Document, DbOptions } from "npm:mongodb";
 
-class Uri {
+export class Uri {
   private readonly uri: string;
 
   constructor(protocol: string, cridentials: string, hostnamePort: string, options?: string[]) {
@@ -14,7 +14,6 @@ class Uri {
     } else {
       throw new Error("Uri | Uri parameters are incorrect.");
     }
-    // console.log(this.uri);
   }
 
   public get(): string | undefined {
@@ -22,7 +21,7 @@ class Uri {
   }
 }
 
-class Client<T extends Document = Document> {
+export class Client<T extends Document = Document> {
   private readonly uri: string;
 
   public readonly client: MongoClient;
@@ -67,16 +66,13 @@ class Client<T extends Document = Document> {
 
   public async getCollectionTransaction(func: (collection: Collection<T>, session?: ClientSession) => Promise<void>): Promise<void> {
     const session = this.client.startSession();
-    // console.log("Session started.");
     try {
       await session.withTransaction(async () => {
-        // console.log("Transaction performed.");
         const collection = this.getCollection();
         await func(collection, session);
       });
     } finally {
       await session.endSession();
-      // console.log("Session ended.");
     }
   }
 
@@ -91,26 +87,6 @@ class Client<T extends Document = Document> {
     }
   }
 }
-
-interface User {
-  _id?: ObjectId,
-  email: string,
-  password: string
-}
-
-const client = new Client<User>(
-  new Uri("mongodb", "root:password", "localhost:27017"),
-  "db",
-  "test"
-);
-
-client.testConnection();
-
-client.getCollectionTransaction(async (collection) => {
-  const count = await collection.countDocuments();
-  console.log(`Document count: ${count}.`);
-});
-
 
 
 
