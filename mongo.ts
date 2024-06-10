@@ -1,18 +1,20 @@
-import { MongoClient, clientOptions, CollectionOptions, Collection, Document, ObjectId, DbOptions } from "npm:mongodb";
+import { MongoClient, ClientSession, clientOptions, CollectionOptions, Collection, Document, ObjectId, DbOptions } from "npm:mongodb";
 
 class Uri {
   private readonly uri: string;
 
-  constructor(protocol: string, cridentials: string, hostnamePort: string, options?: string) {
+  constructor(protocol: string, cridentials: string, hostnamePort: string, options?: string[]) {
     if (protocol && cridentials && hostnamePort) {
-      if (options) {
-        this.uri = `${protocol}://${cridentials}@${hostnamePort}/${options}`;
+      this.uri = `${protocol}://${cridentials}@${hostnamePort}`;
+      if (options && options.length > 0) {
+        this.uri += `/?${options.join('&')}`;
       } else {
         this.uri = `${protocol}://${cridentials}@${hostnamePort}`;
       }
     } else {
       throw new Error("Uri | Uri parameters are incorrect.");
     }
+    // console.log(this.uri);
   }
 
   public get(): string | undefined {
@@ -22,9 +24,11 @@ class Uri {
 
 class Client<T extends Document = Document> {
   private readonly uri: string;
-  private readonly client: MongoClient;
+
+  public readonly client: MongoClient;
   public readonly databaseName: string;
   public readonly collectionName: string;
+
   private readonly dbOptions?: DbOptions
   private readonly collectionOptions?: CollectionOptions
 
@@ -49,9 +53,9 @@ class Client<T extends Document = Document> {
 
     if (!collectionName) {
       throw new Error("Client | Collection name is incorrect.");
-    } 
+    }
     this.collectionName = collectionName;
-    
+
     this.client = new MongoClient(this.uri, mongoClientOptions);
     this.dbOptions = dbOptions;
     this.collectionOptions = collectionOptions;
@@ -61,10 +65,27 @@ class Client<T extends Document = Document> {
     return this.client.db(this.databaseName, this.dbOptions).collection(this.collectionName, this.collectionOptions);
   }
 
+  public async getCollectionTransaction(func: (collection: Collection<T>, session?: ClientSession) => Promise<void>): Promise<void> {
+    const session = this.client.startSession();
+    // console.log("Session started.");
+    try {
+      await session.withTransaction(async () => {
+        // console.log("Transaction performed.");
+        const collection = this.getCollection();
+        await func(collection, session);
+      });
+    } finally {
+      await session.endSession();
+      // console.log("Session ended.");
+    }
+  }
+
   public async testConnection() {
     try {
       await this.client.db(this.databaseName).command({ ping: 1 });
       console.log("Client | Success.");
+    } catch (e) {
+      throw e;
     } finally {
       await this.client.close();
     }
@@ -72,7 +93,7 @@ class Client<T extends Document = Document> {
 }
 
 interface User {
-  _id: ObjectId,
+  _id?: ObjectId,
   email: string,
   password: string
 }
@@ -83,6 +104,13 @@ const client = new Client<User>(
   "test"
 );
 
-
 client.testConnection();
-client.getCollection().countDocuments().then(res => console.log(res.toString()));
+
+client.getCollectionTransaction(async (collection) => {
+  const count = await collection.countDocuments();
+  console.log(`Document count: ${count}.`);
+});
+
+
+
+
