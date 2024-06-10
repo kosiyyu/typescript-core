@@ -71,6 +71,8 @@ export class Client<T extends Document = Document> {
         const collection = this.getCollection();
         await func(collection, session);
       });
+    } catch {
+      await session.abortTransaction();
     } finally {
       await session.endSession();
     }
