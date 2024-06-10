@@ -89,6 +89,3 @@ export class Client<T extends Document = Document> {
     }
   }
 }
-
-
-
