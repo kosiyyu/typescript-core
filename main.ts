@@ -8,7 +8,7 @@ interface User {
 }
 
 const client = new Client<User>(
-  new Uri("mongodb", "root:password", "localhost:27017"),
+  new Uri("mongodb1", "root", "password", "localhost", 27017),
   "db",
   "test"
 );

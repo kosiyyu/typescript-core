@@ -3,13 +3,18 @@ import { MongoClient, ClientSession, clientOptions, CollectionOptions, Collectio
 export class Uri {
   private readonly uri: string;
 
-  constructor(protocol: string, cridentials: string, hostnamePort: string, options?: string[]) {
-    if (protocol && cridentials && hostnamePort) {
-      this.uri = `${protocol}://${cridentials}@${hostnamePort}`;
+  constructor(protocol: string, username: string, password: string, hostname: string, port: string | number, options?: string[]) {
+    if (protocol && username && password && hostname && port) {
+      if(protocol === "mongodb") {
+        this.uri = `${protocol}://${username}:${password}@${hostname}:${port}`;
+      } else if(protocol === "mongo+srv") {
+        throw new Error("Uri | Invalid constructor parameter: mongo+srv is not supported yet");
+      } else {
+        throw new Error(`Uri | Invalid constructor parameter: protocol is ${protocol} and should be mongodb or mongo+srv`);
+      }
+
       if (options && options.length > 0) {
         this.uri += `/?${options.join('&')}`;
-      } else {
-        this.uri = `${protocol}://${cridentials}@${hostnamePort}`;
       }
     } else {
       throw new Error("Uri | Uri parameters are incorrect.");
