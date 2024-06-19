@@ -1,6 +1,6 @@
 import { MongoClient, ClientSession, clientOptions, CollectionOptions, Collection, Document, DbOptions } from "npm:mongodb";
 
-export class Uri {
+export class MongoUri {
   private readonly uri: string;
 
   constructor(protocol: string, username: string, password: string, hostname: string, port: string | number, options?: string[]) {
@@ -37,7 +37,7 @@ export class MongoProvider<T extends Document = Document> {
   private readonly collectionOptions?: CollectionOptions
 
   constructor(
-    uri: Uri,
+    uri: MongoUri,
     databaseName: string,
     collectionName: string,
     mongoClientOptions?: clientOptions,
