@@ -8,16 +8,16 @@ export class Uri {
       if(protocol === "mongodb") {
         this.uri = `${protocol}://${username}:${password}@${hostname}:${port}`;
       } else if(protocol === "mongo+srv") {
-        throw new Error("Uri | Invalid constructor parameter: mongo+srv is not supported yet");
+        throw new Error(`${this.constructor.name} | Invalid constructor parameter: mongo+srv is not supported yet.`);
       } else {
-        throw new Error(`Uri | Invalid constructor parameter: protocol is ${protocol} and should be mongodb or mongo+srv`);
+        throw new Error(`${this.constructor.name} | Invalid constructor parameter: protocol is ${protocol} and should be mongodb or mongo+srv.`);
       }
 
       if (options && options.length > 0) {
         this.uri += `/?${options.join('&')}`;
       }
     } else {
-      throw new Error("Uri | Uri parameters are incorrect.");
+      throw new Error(`${this.constructor.name} | Uri parameters are incorrect.`);
     }
   }
 
@@ -26,7 +26,7 @@ export class Uri {
   }
 }
 
-export class Client<T extends Document = Document> {
+export class MongoProvider<T extends Document = Document> {
   private readonly uri: string;
 
   public readonly client: MongoClient;
@@ -46,17 +46,17 @@ export class Client<T extends Document = Document> {
   ) {
     const uriString = uri.get();
     if (!uriString) {
-      throw new Error("Client | Uri string is incorrect.");
+      throw new Error(`${this.constructor.name} | Uri string is incorrect.`);
     }
     this.uri = uriString;
 
     if (!databaseName) {
-      throw new Error("Client | Database name is incorrect.");
+      throw new Error(`${this.constructor.name} | Database name is incorrect.`);
     }
     this.databaseName = databaseName;
 
     if (!collectionName) {
-      throw new Error("Client | Collection name is incorrect.");
+      throw new Error(`${this.constructor.name} | Collection name is incorrect.`);
     }
     this.collectionName = collectionName;
 
@@ -83,14 +83,14 @@ export class Client<T extends Document = Document> {
     }
   }
 
-  public async testConnection() {
-    try {
-      await this.client.db(this.databaseName).command({ ping: 1 });
-      console.log("Client | Success.");
-    } catch (e) {
-      throw e;
-    } finally {
-      await this.client.close();
-    }
+  public testConnection() {
+    this.getCollectionTransaction(async (_collection) => {
+      const response = await this.client.db(this.databaseName).command({ ping: 1 });
+      if(response.ok && response.ok === 1) {
+        console.log(`${this.constructor.name} | Success.`);
+        return;
+      }
+      console.log(`${this.constructor.name} | Failure.`);
+    });
   }
 }
