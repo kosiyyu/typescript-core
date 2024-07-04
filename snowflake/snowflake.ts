@@ -1,18 +1,15 @@
-let timestamp = BigInt(Date.now());
-let sequence = 223n;
-let datacenterId = 23n;
-let machineId = 45n;
-
 function ensureLength(arg: bigint, bitLength: bigint): bigint {
   return arg & ((1n << bitLength) - 1n);
 }
 
-timestamp = ensureLength(timestamp, 41n);
-datacenterId = ensureLength(datacenterId, 5n);
-machineId = ensureLength(machineId, 5n);
-sequence = ensureLength(sequence, 12n);
+function generate(datacenterId: bigint, machineId: bigint, sequence: bigint): bigint {
+  return (ensureLength(BigInt(Date.now()), 41n) << 22n) |
+    (ensureLength(datacenterId, 5n) << 17n) |
+    (ensureLength(machineId, 5n) << 12n) |
+    ensureLength(sequence, 12n);
+}
 
-const snowflakeId = (timestamp << 22n) | (datacenterId << 17n) | (machineId << 12n) | sequence;
+const snowflakeId = generate(1n, 1n, 1n);
 
 console.log(snowflakeId.toString(16));
 console.log(snowflakeId.toString(10));
