@@ -20,8 +20,8 @@ class Generator {
   }
 
   public next(): bigint {
-    if(this.sequence === MAX_SEQUENCE) {
-      while(this.timestamp === this.oldTimestamp) {
+    if (this.sequence === MAX_SEQUENCE) {
+      while (this.timestamp === this.oldTimestamp) {
         this.timestamp = BigInt(Date.now());
       }
       this.oldTimestamp = this.timestamp;
@@ -31,9 +31,9 @@ class Generator {
     this.sequence = (this.sequence + 1n) & MAX_SEQUENCE;
 
     return (ensureLength(this.timestamp, 41n) << 22n) |
-    (ensureLength(this.datacenterId, 5n) << 17n) |
-    (ensureLength(this.machineId, 5n) << 12n) |
-    ensureLength(this.sequence, 12n);
+      (ensureLength(this.datacenterId, 5n) << 17n) |
+      (ensureLength(this.machineId, 5n) << 12n) |
+      ensureLength(this.sequence, 12n);
   }
 }
 
@@ -42,11 +42,11 @@ function testUniqnes(timeoutInMs: number): boolean {
   const prev = -1n;
   const generator = new Generator(1n, 1n);
 
-  while(true) {
-    if(prev === generator.next()) {
+  while (true) {
+    if (prev === generator.next()) {
       return false;
     }
-    if(Date.now() - start >= timeoutInMs) {
+    if (Date.now() - start >= timeoutInMs) {
       break;
     }
   }
