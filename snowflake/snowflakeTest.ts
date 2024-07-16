@@ -1,5 +1,5 @@
 import { assertEquals, assert } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { Generator, MAX_SEQUENCE } from "./snowflake.ts"; // Adjust the import path as needed
+import { Generator, MAX_SEQUENCE } from "./snowflake.ts";
 
 Deno.test("Generator - should handle sequence overflow", () => {
   const generator = new Generator(1n, 1n);
