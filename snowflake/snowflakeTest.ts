@@ -38,10 +38,10 @@ Deno.test("Generator - should generate monotonically increasing IDs", () => {
   assert(id2 > id1, "Second ID should be greater than the first");
 });
 
-Deno.test("Generator - should generate unique IDs", () => {
+Deno.test("Generator - should generate unique IDs (note - it can take a few seconds)", () => {
   const generator = new Generator(1n, 1n);
   const ids = new Set<bigint>();
-  const numIds = 10000;
+  const numIds = 1_000_000;
 
   for (let i = 0; i < numIds; i++) {
     const id = generator.next();

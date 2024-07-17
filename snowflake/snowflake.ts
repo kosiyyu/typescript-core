@@ -20,15 +20,13 @@ export class Generator {
   }
 
   public next(): bigint {
+    this.oldTimestamp = this.timestamp;
     if (this.sequence === MAX_SEQUENCE) {
+      this.sequence = 0n;
       while (this.timestamp === this.oldTimestamp) {
         this.timestamp = BigInt(Date.now());
       }
-      this.oldTimestamp = this.timestamp;
-      this.sequence = 0n;
-    }
-
-    this.sequence = (this.sequence + 1n) & MAX_SEQUENCE;
+    } else this.sequence = (this.sequence + 1n) & MAX_SEQUENCE;
 
     return (ensureLength(this.timestamp, 41n) << 22n) |
       (ensureLength(this.datacenterId, 5n) << 17n) |
