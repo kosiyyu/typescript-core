@@ -41,12 +41,12 @@ Deno.test("Generator - should generate monotonically increasing IDs", () => {
 Deno.test("Generator - should generate unique IDs (note - it can take a few seconds)", () => {
   const generator = new Generator(1n, 1n);
   const ids = new Set<bigint>();
-  const numIds = 1_000_000;
+  const numIds = MAX_SEQUENCE ** 2n;
 
-  for (let i = 0; i < numIds; i++) {
+  for (let i = 0n; i < numIds; i++) {
     const id = generator.next();
     if(!ids.has(id)) ids.add(id);
   }
 
-  assertEquals(ids.size, numIds, `Should have generated ${numIds} unique IDs`);
+  assertEquals(BigInt(ids.size), numIds, `Should have generated ${numIds} unique IDs`);
 });
