@@ -4,8 +4,8 @@ export type Column<T> = Map<T, string>;
 
 export type Row<T extends Record<string, unknown>> = Map<keyof T, T[keyof T]>;
 
-export function getKeys<T extends object>(c: new () => T): (keyof T)[] {
-  return Object.keys(new c()) as (keyof T)[];
+export function getKeys<T extends object>(c: new () => T): Array<keyof T> {
+  return Object.keys(new c()) as Array<keyof T> ;
 }
 
 function isNullOrUndefined(arg: unknown): boolean {
@@ -20,7 +20,7 @@ export class Schema {
 export class Kvcol<T extends Record<string, unknown>> {
   private readonly columns: Map<keyof T, Column<T[keyof T]>>;
   private readonly rows: Map<string, Row<T>>;
-  private readonly names: (keyof T)[];
+  private readonly names: Array<keyof T> ;
   private readonly idGen: IdGenerator;
 
   constructor(c: new () => T) {
