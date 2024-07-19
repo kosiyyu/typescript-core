@@ -1,8 +1,8 @@
 import { assertEquals, assert } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { Generator, MAX_SEQUENCE } from "./snowflake.ts";
+import { IdGenerator, MAX_SEQUENCE } from "./snowflake.ts";
 
-Deno.test("Generator - should handle sequence overflow", () => {
-  const generator = new Generator(1n, 1n);
+Deno.test(`${IdGenerator.name} - should handle sequence overflow`, () => {
+  const generator = new IdGenerator(1n, 1n);
 
   for (let i = 0; i <= Number(MAX_SEQUENCE); i++) {
     generator.next();
@@ -14,8 +14,8 @@ Deno.test("Generator - should handle sequence overflow", () => {
   assert(id1 !== id2, "IDs should be different after sequence overflow");
 });
 
-Deno.test("Generator - should use correct bit lengths", () => {
-  const generator = new Generator(1n, 1n);
+Deno.test(`${IdGenerator.name} - should use correct bit lengths`, () => {
+  const generator = new IdGenerator(1n, 1n);
   const id = generator.next();
 
   // Check timestamp (41 bits)
@@ -31,15 +31,15 @@ Deno.test("Generator - should use correct bit lengths", () => {
   assert((id & 0b111111111111n) < 1n << 12n, "Sequence should be less than 2^12");
 });
 
-Deno.test("Generator - should generate monotonically increasing IDs", () => {
-  const generator = new Generator(1n, 1n);
+Deno.test(`${IdGenerator.name} - should generate monotonically increasing IDs`, () => {
+  const generator = new IdGenerator(1n, 1n);
   const id1 = generator.next();
   const id2 = generator.next();
   assert(id2 > id1, "Second ID should be greater than the first");
 });
 
-Deno.test("Generator - should generate unique IDs (note - it can take a few seconds)", () => {
-  const generator = new Generator(1n, 1n);
+Deno.test(`${IdGenerator.name} - should generate unique IDs (note - it can take a few seconds)`, () => {
+  const generator = new IdGenerator(1n, 1n);
   const ids = new Set<bigint>();
   const numIds = MAX_SEQUENCE ** 2n;
 

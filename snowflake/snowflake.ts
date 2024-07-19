@@ -4,7 +4,7 @@ function ensureLength(arg: bigint, bitLength: bigint): bigint {
   return arg & ((1n << bitLength) - 1n);
 }
 
-export class Generator {
+export class IdGenerator {
   private timestamp: bigint;
   private oldTimestamp: bigint;
   private sequence: bigint;
@@ -32,5 +32,9 @@ export class Generator {
       (ensureLength(this.datacenterId, 5n) << 17n) |
       (ensureLength(this.machineId, 5n) << 12n) |
       ensureLength(this.sequence, 12n);
+  }
+
+  public nextInHex(): string {
+    return this.next().toString(16);
   }
 }
