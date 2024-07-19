@@ -1,38 +1,42 @@
-type Column = Map<unknown, string>;
+import { IdGenerator } from "../snowflake/snowflake.ts"
 
-// Row is basically an object nameKeys: values
-type Row = Map<string, unknown>;
+export type Column<T> = Map<T, string>;
+
+export type Row<T extends Record<string, unknown>> = Map<keyof T, T[keyof T]>;
+
+export function getKeys<T extends object>(c: new () => T): (keyof T)[] {
+  return Object.keys(new c()) as (keyof T)[];
+}
 
 function isNullOrUndefined(arg: unknown): boolean {
   return arg === null || arg === undefined;
 }
 
-class Kvcol {
-  private readonly columns: Map<string, Column>;
-  private readonly rows: Map<string, Row>;
-  private rowCounter: number;
-  private names: string[];
+export class Kvcol<T extends Record<string, unknown>> {
+  private readonly columns: Map<keyof T, Column<T[keyof T]>>;
+  private readonly rows: Map<string, Row<T>>;
+  private readonly names: (keyof T)[];
+  private readonly idGen: IdGenerator;
 
-  constructor(names: string[]) {
+  constructor(c: new () => T) {
     this.columns = new Map();
     this.rows = new Map();
-    this.rowCounter = 0;
-    this.names = names;
+    this.names = getKeys(c);
+    this.idGen = new IdGenerator(1n, 1n);
 
-    for (const name of names) {
+    for (const name of this.names) {
       this.columns.set(name, new Map());
     }
   }
 
-  getColumnByName(name: string): Column | undefined {
+  getColumnByName(name: string): Column<T[keyof T]> | undefined {
     const result = this.columns.get(name);
     if (!isNullOrUndefined(result)) {
       return result;
     }
-    return undefined;
   }
 
-  private countKeys(arg: Object): number {
+  private _countKeys(arg: object): number {
     let counter = 0;
     for (const _ in arg) {
       counter++;
@@ -40,50 +44,44 @@ class Kvcol {
     return counter;
   }
 
-  private isCorrect(arg: Object): boolean {
-    return this.names.length === this.countKeys(arg); // add proper check
+  private _isKeyLengthCorrect(arg: object): boolean {
+    return this.names.length === this._countKeys(arg);
   }
 
-  addRow(arg: Object): void {
-    if (!this.isCorrect(arg)) {
+  addRow(arg: T): void {
+    (arg as Schema).id = this.idGen.nextInHex();
+    if (!this._isKeyLengthCorrect(arg)) {
       console.error("Incorrect object format.");
       return;
     }
 
-    const newRow: Row = new Map();
+    const newRow: Row<T> = new Map();
 
-    // Populate newRow with properties from arg
+    const id = this.idGen.nextInHex();
+
     for (const key in arg) {
       if (Object.prototype.hasOwnProperty.call(arg, key)) {
         const value = arg[key];
         newRow.set(key, value);
 
-        // Update columns map
         const column = this.getColumnByName(key);
         if (column) {
-          column.set(value, this.rowCounter.toString());
+          column.set(value, id);
         } else {
           console.error(`Column '${key}' does not exist.`);
         }
       }
     }
 
-    this.rows.set(this.rowCounter.toString(), newRow);
-    this.rowCounter++;
+    this.rows.set(id, newRow);
   }
 
-  getRowByIdentifier(arg: string): Row | undefined {
-    return this.rows.get(arg)
+  getRowByIdentifier(arg: string): Row<T> | undefined {
+    return this.rows.get(arg);
   }
 }
 
-const db = new Kvcol(["id", "height", "birthday"]);
-
-db.addRow({ id: "0", height: 177, birthday: new Date("2000-01-01") });
-db.addRow({ id: "1", height: 180, birthday: new Date("1995-05-15") });
-db.addRow({ id: "2", height: 165, birthday: new Date("1988-11-30") });
-db.addRow({ id: "3", height: 172, birthday: new Date("2002-09-20") });
-db.addRow({ id: "4", height: 185, birthday: new Date("1990-03-10") });
-
-console.log(db.getColumnByName("height"));
-console.log(db.getRowByIdentifier("0"));
+export class Schema {
+  id?: string;
+  [key: string]: unknown;
+}
