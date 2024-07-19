@@ -12,6 +12,11 @@ function isNullOrUndefined(arg: unknown): boolean {
   return arg === null || arg === undefined;
 }
 
+export class Schema {
+  id?: string;
+  [key: string]: unknown;
+}
+
 export class Kvcol<T extends Record<string, unknown>> {
   private readonly columns: Map<keyof T, Column<T[keyof T]>>;
   private readonly rows: Map<string, Row<T>>;
@@ -79,9 +84,4 @@ export class Kvcol<T extends Record<string, unknown>> {
   getRowByIdentifier(arg: string): Row<T> | undefined {
     return this.rows.get(arg);
   }
-}
-
-export class Schema {
-  id?: string;
-  [key: string]: unknown;
 }
