@@ -1,4 +1,4 @@
-import { Schema, Kvcol, Column } from "./kvcol.ts"
+import { Schema, Kvcol } from "./kvcol.ts"
 
 class MyClass extends Schema {
   height!: number;
@@ -13,9 +13,19 @@ db.addRow({ height: 165, birthday: new Date("1988-11-30") });
 db.addRow({ height: 172, birthday: new Date("2002-09-20") });
 db.addRow({ height: 185, birthday: new Date("1990-03-10") });
 
-console.log(db.getColumnByName("height"));
-const map: Column<unknown> | undefined = db.getColumnByName("height");
-const id: string | undefined = map.get(177);
-if(map && id){
-  console.log(db.getRowByIdentifier(map?.get(177)));
-}
+const id = db.pipeline()
+  .getColumnByName("height")
+  .value()
+  .get(177) as string;
+
+const pipe = db.pipeline()
+  .getRowByIdentifier(id)
+  .value();
+
+console.log(pipe);
+
+const pipe2 = db.pipeline()
+  .getColumnByName("height")
+  .value();
+
+console.log(pipe2);
